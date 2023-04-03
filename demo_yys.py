@@ -18,6 +18,7 @@ import random
 # 	time.sleep(r)
 
 #ADB模型 CV图像
+# 960*
 single = False
 sum = 0
 if single:
@@ -26,8 +27,8 @@ if single:
 		myplayer.find_touch(['960_yys_tiaozhan', '960_yys_jixu']) # 魂土
 		# myplayer.find_touch(['yys_tiaozhan', 'yys_jixu']) # 御灵
 		# myplayer.find_touch(['huodong_tiaozhan', 'yys_jixu']) # 御灵
-		if sum > 5:
-		# if sum > 60*(20+random.randint(1, 5)):
+		# if sum > 5:
+		if sum > 60*(20+random.randint(1, 5)):
 			myplayer.moni()
 			sum = 0
 		r = random.randint(10, 15) / 10
