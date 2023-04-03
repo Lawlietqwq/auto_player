@@ -17,7 +17,7 @@ import random
 # 	r = random.randint(10, 15) / 10
 # 	time.sleep(r)
 
-#ADB模型 CV图像
+#ADB模型 CV图像 960*540
 # 960*
 single = False
 sum = 0
@@ -42,7 +42,7 @@ else:
 		# myplayer0.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])  # 御灵
 		myplayer1.find_touch(['960_hun11_tiaozhan', '960_yys_jixu'])  # 魂土
 		myplayer0.find_touch(['960_hun11_tiaozhan', '960_yys_jixu'])  # 魂土
-		if sum > 5:
+		if sum > 60*(10+random.randint(1, 5)):
 			# if sum > 60*(20+random.randint(1, 5)):
 			myplayer1.moni()
 			myplayer0.moni()
