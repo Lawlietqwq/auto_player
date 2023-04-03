@@ -28,7 +28,7 @@ if single:
 		# myplayer.find_touch(['yys_tiaozhan', 'yys_jixu']) # 御灵
 		# myplayer.find_touch(['huodong_tiaozhan', 'yys_jixu']) # 御灵
 		# if sum > 5:
-		if sum > 60*(20+random.randint(1, 5)):
+		if sum > 60*(10+random.randint(1, 5)):
 			myplayer.moni()
 			sum = 0
 		r = random.randint(10, 15) / 10
