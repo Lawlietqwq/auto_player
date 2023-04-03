@@ -1,6 +1,9 @@
 # coding: utf-8
+import time
+
 from auto_player import Player
 import paddlehub as hub
+import random
 
 class OCR_Player(Player):
     """docstring for OCR_player"""
@@ -32,15 +35,33 @@ class OCR_Player(Player):
                 found = [e for e in data if key == e['text']]
             else:
                 found = [e for e in data if key in e['text']]
-            msg = f'目标：{key},  找到数量：{len(found)}'
+            length = len(found)
+            msg = f'目标：{key},  找到数量：{length}'
             print(msg)
             if found:
-                p1, _, p2, _ = found[0]['text_box_position']
-                (x1, y1), (x2, y2) = p1, p2
-                center = (int((x1+x2)/2), int((y1+y2)/2))
-                self.touch(center)
                 re = key
-                break
+                if length==1:
+                    p1, _, p2, _ = found[0]['text_box_position']
+                    (x1, y1), (x2, y2) = p1, p2
+                    center = (int((x1+x2)/2), int((y1+y2)/2))
+                    if self.drag_flag:
+                        self.drag_flag(center)
+                    else:
+                        self.touch(center)
+                    # re = key
+                    break
+                else:
+                    for i in range(length):
+                        p1, _, p2, _ = found[i]['text_box_position']
+                        (x1, y1), (x2, y2) = p1, p2
+                        center = (int((x1 + x2) / 2), int((y1 + y2) / 2))
+                        if self.drag_flag:
+                            self.drag_flag(center)
+                        else:
+                            self.touch(center)
+                        r = random.randint(5, 10)/10
+                        time.sleep(r)
+                        # re = key
         return re
 
     def exist(self, key_list, debug=False):

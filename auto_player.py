@@ -1,6 +1,7 @@
 import time, os, random, threading
 import cv2, numpy, pyautogui
 from PIL import ImageGrab
+import paddlehub as hub
 
 #桌面模式下的鼠标操作延迟，程序已经设置随机延迟这里无需设置修改
 pyautogui.PAUSE = 0.001
@@ -8,22 +9,23 @@ cwd = __file__.replace('auto_player.py', '')  #当前文件目录
 wanted_path = f'{cwd}\\wanted'      #目标图片目录
 #上面都不用改，下面是adb.exe文件所在路径要改，
 #如果你已经加入系统PATH环境，就直接adb = 'adb',我的没加。 只用桌面模式话不用管
-adb = 'd: && cd \\mysys\\Nox\\bin\\ && nox_adb.exe' #ADB文件路径
-nxfd = 'C:\\Users\\Administrator\\Nox_share\\ImageShare' #模拟器共享文件路径
-
+adb = 'd: && cd \\Program Files\\Nox\\bin\\ && nox_adb.exe' #ADB文件路径
+nxfd = 'C:\\Users\\wanquan\\Nox_share\\ImageShare' #模拟器共享文件路径
 class Player(object):
     """docstring for Player"""
        # accuracy 匹配精准度 0~1 #adb_mode开启ADB模式  #adb_num连接第几台ADB设备
-    def __init__(self, accuracy=0.8, adb_mode=False, adb_num=0):
+    def __init__(self, accuracy=0.8, adb_mode=False, adb_num=0, drag_flag=False):
         super(Player, self).__init__()
-        self.accuracy = accuracy  
+        self.accuracy = accuracy
+        self.drag_flag = drag_flag
         self.adb_mode = adb_mode  
         self.load_target()  
         if self.adb_mode:
             re = os.popen(f'{adb} devices').read()
             print(re)
             device_list = [e.split('\t')[0] for e in re.split('\n') if '\tdevice' in e]
-            assert len(device_list) >= 1, '未检测到ADB连接设备'
+            # assert len(device_list) >= 1, '未检测到ADB连接设备'
+            self.adb_num = adb_num
             self.device = device_list[adb_num] 
             re = os.popen(f'{adb} -s {self.device} shell wm size').read()
             print(re)
@@ -48,13 +50,13 @@ class Player(object):
 
     #截屏并发送到目录./screen, 默认返回cv2读取后的图片
     def screen_shot(self, name='screen'):
-        if self.adb_mode:         
-            a = f'{adb} -s {self.device} shell screencap -p sdcard/Pictures/{name}.jpg'
-            b = f'{adb} -s {self.device} pull sdcard/Pictures/{name}.jpg {cwd}\\screen'
+        if self.adb_mode:
+            a = f'{adb} -s {self.device} shell screencap -p sdcard/Pictures/{name}{self.adb_num}.jpg'
+            b = f'{adb} -s {self.device} pull sdcard/Pictures/{name}{self.adb_num}.jpg {cwd}\\screen'
             for cmd in [a, b]:
                 os.system(cmd)
                 time.sleep(0.02)
-            screen = cv2.imread(f'{cwd}\\screen\\{name}.jpg')
+            screen = cv2.imread(f'{cwd}\\screen\\{name}{self.adb_num}.jpg')
             #screen = cv2.imread(f'{nxfd}\\{name}.jpg')
             #大部分模拟器截图自动同步到共享文件夹 其实不用PULL的
         else:
@@ -75,24 +77,25 @@ class Player(object):
 
     # ADB命令模拟点击屏幕，参数pos为目标坐标(x, y), 自带随机偏移
     # 或pyautogui鼠标点击，带偏移与延迟
-    def touch(self, position):
+    def touch(self, position, second=0.3):
         x, y = self.random_offset(position)
         if self.adb_mode: #手机点击
             cmd = f'{adb} -s {self.device} shell input touchscreen tap {x} {y}'
             os.system(cmd)
         else: #电脑点击
-            origin = pyautogui.position()
+            origin = self.random_offset(pyautogui.position())
             dt = random.uniform(0.01, 0.02)
-            pyautogui.moveTo(x, y, duration=dt)
+            pyautogui.moveTo(x, y, duration=dt + second)
             pyautogui.mouseDown(button='left')
             time.sleep(dt) #有的游戏就是不能识别click,但是可以down加up，很奇怪
             pyautogui.mouseUp(button='left')
-            pyautogui.moveTo(*origin, duration=dt)
+            pyautogui.moveTo(*origin, duration=second-dt)
 
     #拖动或长按
-    def drag(self, position_start, end, second=0.2):
-        sx, sy = random_offset(position_start)
-        ex, ey = random_offset(end)
+    def drag(self, position_start, second=0.3):
+        sx, sy = self.random_offset(position_start)
+        origin = pyautogui.position()
+        ex, ey = self.random_offset(origin)
         if self.adb_mode:
             cmd = f'{adb} -s {self.device} shell input touchscreen swipe {sx} {sy} {ex} {ey}'
             os.system(cmd)
@@ -100,8 +103,10 @@ class Player(object):
             origin = pyautogui.position() #记录原位，点完返回
             dt = random.uniform(0.01, 0.02)
             pyautogui.moveTo(sx, sy, duration=dt)
+            pyautogui.mouseDown(button='left')
+            time.sleep(dt)  # 有的游戏就是不能识别click,但是可以down加up，很奇怪
+            pyautogui.mouseUp(button='left')
             pyautogui.dragTo(ex, ey, duration=second+dt)
-            pyautogui.moveTo(*origin, duration=dt)
 
     #在图上标记位置p1左上，p2右下
     def mark(self, background, p1, p2):
@@ -173,10 +178,47 @@ class Player(object):
         for name in name_list:
             loc_pos = self.locate(background, name)
             if len(loc_pos) > 0:
-                if area: #从裁剪后的坐标还原回裁前的坐标
-                    loc_pos[0][0] += start[0] 
-                    loc_pos[0][1] += start[1]
-                self.touch(loc_pos[0]) #同一目标多个结果时只点第一个
-                re = name
-                break            
+                for i in range(len(loc_pos)):
+                    if area: #从裁剪后的坐标还原回裁前的坐标
+                        loc_pos[i][0] += start[0]
+                        loc_pos[i][1] += start[1]
+                    if self.drag_flag:
+                        self.drag(loc_pos[i]) #同一目标多个结果时只点第一个
+                    else:
+                        self.touch(loc_pos[i])
+                    r = random.randint(5, 10)/10
+                    time.sleep(r)
+                    re = name
+                    # break
+        return re
+
+    # 打开频道模拟
+    def moni(self, area=None):
+        name_list = ['960_yys_moni', '960_yys_duihua']
+        re = False
+        name_list = name_list if type(name_list) == list else [name_list,]
+        if random.randint(1,2) % 2 == 1:
+            name_list.insert(1, '960_yys_shijie')
+        else:
+            name_list.insert(1, '960_yys_yinyangliao')
+        for name in name_list:
+            if name == '960_yys_duihua':
+                time.sleep(random.randint(2, 3))
+            background = self.screen_shot()
+            if area:
+                background, start = self.cut(background, area)
+            loc_pos = self.locate(background, name)
+            if len(loc_pos) > 0:
+                for i in range(len(loc_pos)):
+                    if area: #从裁剪后的坐标还原回裁前的坐标
+                        loc_pos[i][0] += start[0]
+                        loc_pos[i][1] += start[1]
+                    if self.drag_flag:
+                        self.drag(loc_pos[i]) #同一目标多个结果时只点第一个
+                    else:
+                        self.touch(loc_pos[i])
+                    r = random.randint(5, 10)/10
+                    time.sleep(r)
+                    re = name
+                    # break
         return re

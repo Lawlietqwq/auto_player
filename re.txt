@@ -85,7 +85,6 @@ pyrsistent==0.19.3
 PyScreeze==0.1.28
 python-dateutil==2.8.2
 python-multipart==0.0.6
-python-opencv==1.0.0.14
 pytweening==1.0.4
 pytz==2022.7.1
 pywin32-ctypes==0.2.0
