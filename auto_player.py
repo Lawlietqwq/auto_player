@@ -77,11 +77,15 @@ class Player(object):
 
     # ADB命令模拟点击屏幕，参数pos为目标坐标(x, y), 自带随机偏移
     # 或pyautogui鼠标点击，带偏移与延迟
-    def touch(self, position, second=0.3):
+    def touch(self, position, double_click=False, second=0.3):
         x, y = self.random_offset(position)
         if self.adb_mode: #手机点击
             cmd = f'{adb} -s {self.device} shell input touchscreen tap {x} {y}'
             os.system(cmd)
+            if double_click:
+                time.sleep(random.randint(20, 25)/10)
+                cmd = f'{adb} -s {self.device} shell input touchscreen tap {x} {y}'
+                os.system(cmd)
         else: #电脑点击
             origin = self.random_offset(pyautogui.position())
             dt = random.uniform(0.01, 0.02)
@@ -89,16 +93,25 @@ class Player(object):
             pyautogui.mouseDown(button='left')
             time.sleep(dt) #有的游戏就是不能识别click,但是可以down加up，很奇怪
             pyautogui.mouseUp(button='left')
+            if double_click:
+                time.sleep(random.randint(20, 25) / 10)
+                pyautogui.mouseDown(button='left')
+                time.sleep(2*dt)  # 有的游戏就是不能识别click,但是可以down加up，很奇怪
+                pyautogui.mouseUp(button='left')
             pyautogui.moveTo(*origin, duration=second-dt)
 
     #拖动或长按
-    def drag(self, position_start, second=0.3):
+    def drag(self, position_start, double_click=False, second=0.3):
         sx, sy = self.random_offset(position_start)
         origin = pyautogui.position()
         ex, ey = self.random_offset(origin)
         if self.adb_mode:
             cmd = f'{adb} -s {self.device} shell input touchscreen swipe {sx} {sy} {ex} {ey}'
             os.system(cmd)
+            if double_click:
+                time.sleep(random.randint(20, 25)/10)
+                cmd = f'{adb} -s {self.device} shell input touchscreen tap {ex} {ey}'
+                os.system(cmd)
         else:
             origin = pyautogui.position() #记录原位，点完返回
             dt = random.uniform(0.01, 0.02)
@@ -106,6 +119,11 @@ class Player(object):
             pyautogui.mouseDown(button='left')
             time.sleep(dt)  # 有的游戏就是不能识别click,但是可以down加up，很奇怪
             pyautogui.mouseUp(button='left')
+            if double_click:
+                time.sleep(random.randint(20, 25) / 10)
+                pyautogui.mouseDown(button='left')
+                time.sleep(2*dt)  # 有的游戏就是不能识别click,但是可以down加up，很奇怪
+                pyautogui.mouseUp(button='left')
             pyautogui.dragTo(ex, ey, duration=second+dt)
 
     #在图上标记位置p1左上，p2右下
@@ -175,6 +193,7 @@ class Player(object):
             background, start = self.cut(background, area)
         re = False
         name_list = name_list if type(name_list) == list else [name_list,]
+        name_list.append('yys_xiezuo')
         for name in name_list:
             loc_pos = self.locate(background, name)
             if len(loc_pos) > 0:
@@ -182,10 +201,17 @@ class Player(object):
                     if area: #从裁剪后的坐标还原回裁前的坐标
                         loc_pos[i][0] += start[0]
                         loc_pos[i][1] += start[1]
+                    if_double_click = 'jixu' in name
                     if self.drag_flag:
-                        self.drag(loc_pos[i]) #同一目标多个结果时只点第一个
+                        if if_double_click:
+                            self.drag(loc_pos[i], True)  # 同一目标多个结果时只点第一个
+                        else:
+                            self.drag(loc_pos[i], False)  # 同一目标多个结果时只点第一个
                     else:
-                        self.touch(loc_pos[i])
+                        if if_double_click:
+                            self.touch(loc_pos[i], True)  # 同一目标多个结果时只点第一个
+                        else:
+                            self.touch(loc_pos[i], False)  # 同一目标多个结果时只点第一个
                     r = random.randint(5, 10)/10
                     time.sleep(r)
                     re = name
@@ -214,9 +240,9 @@ class Player(object):
                         loc_pos[i][0] += start[0]
                         loc_pos[i][1] += start[1]
                     if self.drag_flag:
-                        self.drag(loc_pos[i]) #同一目标多个结果时只点第一个
+                        self.drag(loc_pos[i], False) #同一目标多个结果时只点第一个
                     else:
-                        self.touch(loc_pos[i])
+                        self.touch(loc_pos[i], False) #同一目标多个结果时只点第一个
                     r = random.randint(5, 10)/10
                     time.sleep(r)
                     re = name

@@ -19,14 +19,13 @@ import random
 
 #ADB模型 CV图像 960*540
 # 960*
-single = False
+single = True
 sum = 0
 if single:
-	myplayer = Player(accuracy=0.8, adb_mode=True)
+	myplayer = Player(accuracy=0.8, adb_num=0, adb_mode=True)
 	while True:
 		myplayer.find_touch(['960_yys_tiaozhan', '960_yys_jixu']) # 魂土
-		# myplayer.find_touch(['yys_tiaozhan', 'yys_jixu']) # 御灵
-		# myplayer.find_touch(['huodong_tiaozhan', 'yys_jixu']) # 御灵
+		# myplayer.find_touch(['960_huodong_tiaozhan', '960_yys_jixu']) # 活动
 		# if sum > 5:
 		if sum > 60*(10+random.randint(1, 5)):
 			myplayer.moni()
@@ -35,13 +34,13 @@ if single:
 		sum += r
 		time.sleep(r)
 else:
-	myplayer0 = Player(accuracy=0.8, adb_num=0, adb_mode=True)
-	myplayer1 = Player(accuracy=0.8, adb_num=1, adb_mode=True)
+	myplayer0 = Player(accuracy=0.8, adb_num=0, adb_mode=True)  # 大号
+	myplayer1 = Player(accuracy=0.8, adb_num=1, adb_mode=True)  # 小号
 	while True:
-		# myplayer1.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])  # 御灵
-		# myplayer0.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])  # 御灵
 		myplayer1.find_touch(['960_hun11_tiaozhan', '960_yys_jixu'])  # 魂土
 		myplayer0.find_touch(['960_hun11_tiaozhan', '960_yys_jixu'])  # 魂土
+		#myplayer1.find_touch(['960_huodong_tiaozhan', '960_yys_jixu'])  # 活动
+		#myplayer0.find_touch(['960_huodong_tiaozhan', '960_yys_jixu'])  # 活动
 		if sum > 60*(10+random.randint(1, 5)):
 			# if sum > 60*(20+random.randint(1, 5)):
 			myplayer1.moni()
