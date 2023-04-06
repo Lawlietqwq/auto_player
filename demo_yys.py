@@ -19,10 +19,10 @@ import random
 
 #ADB模型 CV图像 960*540
 # 960*
-single = True
+single = False
 sum = 0
 if single:
-	myplayer = Player(accuracy=0.8, adb_num=0, adb_mode=True)
+	myplayer = Player(accuracy=0.8, adb_num=0, adb_mode=True, stop_times=-1)
 	while True:
 		myplayer.find_touch(['960_yys_tiaozhan', '960_yys_jixu']) # 魂土
 		# myplayer.find_touch(['960_huodong_tiaozhan', '960_yys_jixu']) # 活动
@@ -34,8 +34,8 @@ if single:
 		sum += r
 		time.sleep(r)
 else:
-	myplayer0 = Player(accuracy=0.8, adb_num=0, adb_mode=True)  # 大号
-	myplayer1 = Player(accuracy=0.8, adb_num=1, adb_mode=True)  # 小号
+	myplayer0 = Player(accuracy=0.8, adb_num=0, adb_mode=True, stop_times=600)  # 大号
+	myplayer1 = Player(accuracy=0.8, adb_num=1, adb_mode=True, stop_times=600)  # 小号
 	while True:
 		myplayer1.find_touch(['960_hun11_tiaozhan', '960_yys_jixu'])  # 魂土
 		myplayer0.find_touch(['960_hun11_tiaozhan', '960_yys_jixu'])  # 魂土

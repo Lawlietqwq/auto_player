@@ -14,11 +14,13 @@ nxfd = 'C:\\Users\\wanquan\\Nox_share\\ImageShare' #模拟器共享文件路径
 class Player(object):
     """docstring for Player"""
        # accuracy 匹配精准度 0~1 #adb_mode开启ADB模式  #adb_num连接第几台ADB设备
-    def __init__(self, accuracy=0.8, adb_mode=False, adb_num=0, drag_flag=False):
+    def __init__(self, accuracy=0.8, adb_mode=False, adb_num=0, stop_times=-1, drag_flag=False):
         super(Player, self).__init__()
         self.accuracy = accuracy
         self.drag_flag = drag_flag
-        self.adb_mode = adb_mode  
+        self.adb_mode = adb_mode
+        self.run_times = 0
+        self.stop_times = stop_times
         self.load_target()  
         if self.adb_mode:
             re = os.popen(f'{adb} devices').read()
@@ -78,7 +80,8 @@ class Player(object):
     # ADB命令模拟点击屏幕，参数pos为目标坐标(x, y), 自带随机偏移
     # 或pyautogui鼠标点击，带偏移与延迟
     def touch(self, position, double_click=False, second=0.3):
-        x, y = self.random_offset(position)
+        #x, y = self.random_offset(position)
+        x, y = position
         if self.adb_mode: #手机点击
             cmd = f'{adb} -s {self.device} shell input touchscreen tap {x} {y}'
             os.system(cmd)
@@ -102,15 +105,16 @@ class Player(object):
 
     #拖动或长按
     def drag(self, position_start, double_click=False, second=0.3):
-        sx, sy = self.random_offset(position_start)
+        #sx, sy = self.random_offset(position_start)
+        sx, sy = position_start
         origin = pyautogui.position()
         ex, ey = self.random_offset(origin)
         if self.adb_mode:
-            cmd = f'{adb} -s {self.device} shell input touchscreen swipe {sx} {sy} {ex} {ey}'
+            cmd = f'{adb} -s {self.device} shell input touchscreen swipe {ex} {ey} {sx} {sy}'
             os.system(cmd)
             if double_click:
                 time.sleep(random.randint(20, 25)/10)
-                cmd = f'{adb} -s {self.device} shell input touchscreen tap {ex} {ey}'
+                cmd = f'{adb} -s {self.device} shell input touchscreen tap {sx} {sy}'
                 os.system(cmd)
         else:
             origin = pyautogui.position() #记录原位，点完返回
@@ -139,12 +143,16 @@ class Player(object):
         result = cv2.matchTemplate(background, target, cv2.TM_CCOEFF_NORMED)
         location = numpy.where(result >= self.accuracy)        
         dis = lambda a, b: ((a[0]-b[0])**2 + (a[1]-b[1])**2) **0.5 #计算两点距离
+        last_center = None
         for y, x in zip(*location):
             center = x + int(w/2), y + int(h/2)
-            if loc_pos and dis(loc_pos[-1], center) < 20:  #忽略邻近重复的点
+            if loc_pos and dis(last_center, center) < 20:  #忽略邻近重复的点
                 continue
             else:
-                loc_pos.append(center)
+                click_position = x + random.uniform(0, 1) * w, y + random.uniform(0,1) * h
+                loc_pos.append(click_position)
+                last_center = center
+                #loc_pos.append(center)
                 p2 = x + w, y + h
                 self.mark(background, (x, y), p2)
 
@@ -188,6 +196,8 @@ class Player(object):
     #注意有优先级顺序，找到了前面的就不会再找后面的
     #只返回第一个找到并点击的name，都没找到返回false
     def find_touch(self, name_list, area=None):
+        if self.run_times == self.stop_times:
+            exit()
         background = self.screen_shot()
         if area:
             background, start = self.cut(background, area)
@@ -202,6 +212,9 @@ class Player(object):
                         loc_pos[i][0] += start[0]
                         loc_pos[i][1] += start[1]
                     if_double_click = 'jixu' in name
+                    if 'tiaozhan' in name:
+                        self.run_times += 1
+
                     if self.drag_flag:
                         if if_double_click:
                             self.drag(loc_pos[i], True)  # 同一目标多个结果时只点第一个
