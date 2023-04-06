@@ -203,7 +203,7 @@ class Player(object):
             background, start = self.cut(background, area)
         re = False
         name_list = name_list if type(name_list) == list else [name_list,]
-        name_list.append('yys_xiezuo')
+        name_list.insert(0, 'yys_xiezuo')
         for name in name_list:
             loc_pos = self.locate(background, name)
             if len(loc_pos) > 0:
