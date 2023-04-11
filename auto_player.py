@@ -213,6 +213,7 @@ class Player(object):
                         loc_pos[i][1] += start[1]
                     if_double_click = 'jixu' in name
                     if 'tiaozhan' in name:
+                        print(f'还剩{self.stop_times - self.run_times} 次')
                         self.run_times += 1
 
                     if self.drag_flag:
@@ -232,7 +233,7 @@ class Player(object):
         return re
 
     # 打开频道模拟
-    def moni(self, area=None):
+    def moni(self, twice=False, area=None):
         name_list = ['960_yys_moni', '960_yys_duihua']
         re = False
         name_list = name_list if type(name_list) == list else [name_list,]
@@ -240,6 +241,8 @@ class Player(object):
             name_list.insert(1, '960_yys_shijie')
         else:
             name_list.insert(1, '960_yys_yinyangliao')
+        if twice:
+            name_list = ['yys_xiezuo', '960_yys_duihua']
         for name in name_list:
             if name == '960_yys_duihua':
                 time.sleep(random.randint(2, 3))
@@ -260,4 +263,6 @@ class Player(object):
                     time.sleep(r)
                     re = name
                     # break
+            elif name == '960_yys_duihua':
+                self.moni(twice=True)
         return re

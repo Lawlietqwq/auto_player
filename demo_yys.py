@@ -21,7 +21,7 @@ import random
 # 960*
 single = False
 sum = 0  #多少秒模拟
-stop_times = 600  #次数
+stop_times = 150  #次数
 if single:
 	myplayer = Player(accuracy=0.8, adb_num=0, adb_mode=True, stop_times=stop_times)
 	while True:
@@ -40,8 +40,8 @@ else:
 	while True:
 		myplayer1.find_touch(['960_hun11_tiaozhan', '960_yys_jixu'])  # 魂土
 		myplayer0.find_touch(['960_hun11_tiaozhan', '960_yys_jixu'])  # 魂土
-		#myplayer1.find_touch(['960_huodong_tiaozhan', '960_yys_jixu'])  # 活动
-		#myplayer0.find_touch(['960_huodong_tiaozhan', '960_yys_jixu'])  # 活动
+		# myplayer1.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])  # 活动
+		# myplayer0.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])  # 活动
 		if sum > 60*(10+random.randint(1, 5)):
 			# if sum > 60*(20+random.randint(1, 5)):
 			myplayer1.moni()
