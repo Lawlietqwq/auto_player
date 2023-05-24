@@ -19,18 +19,21 @@ import random
 
 #ADB模型 CV图像 960*540
 # 960*
-single = False
+single = True
 sum = 0  #多少秒模拟
-stop_times = 150  #次数
+stop_times = 298 #次数
 if single:
 	myplayer = Player(accuracy=0.8, adb_num=0, adb_mode=True, stop_times=stop_times)
 	while True:
-		myplayer.find_touch(['960_yys_tiaozhan', '960_yys_jixu']) # 魂土
-		# myplayer.find_touch(['960_huodong_tiaozhan', '960_yys_jixu']) # 活动
+		# myplayer.find_touch(['960_huodong_tiaozhan', '960_yys_jixu']) # 魂土
+		# myplayer.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])
+		myplayer.find_touch(['960_huodong_tiaozhan1.jpg', '960_yys_jixu']) # 活动
 		# if sum > 5:
 		if sum > 60*(10+random.randint(1, 5)):
-			myplayer.moni()
+			re = myplayer.moni()
 			sum = 0
+			if re == 'shibai':
+				sum = 60 * 5
 		r = random.randint(10, 15) / 10
 		sum += r
 		time.sleep(r)
@@ -43,10 +46,12 @@ else:
 		# myplayer1.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])  # 活动
 		# myplayer0.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])  # 活动
 		if sum > 60*(10+random.randint(1, 5)):
-			# if sum > 60*(20+random.randint(1, 5)):
-			myplayer1.moni()
-			myplayer0.moni()
+		# if sum > 10*(1):
+			re1 = myplayer1.moni()
+			re2 = myplayer0.moni()
 			sum = 0
+			if re1 == 'shibai' or re2 == 'shibai':
+				sum = 60 * 5
 		r = random.randint(10, 15) / 10
 		sum += r
 		time.sleep(r)

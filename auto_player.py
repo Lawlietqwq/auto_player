@@ -233,7 +233,7 @@ class Player(object):
         return re
 
     # 打开频道模拟
-    def moni(self, twice=False, area=None):
+    def moni(self, twice=False, area=None, n=0):
         name_list = ['960_yys_moni', '960_yys_duihua']
         re = False
         name_list = name_list if type(name_list) == list else [name_list,]
@@ -245,7 +245,7 @@ class Player(object):
             name_list = ['yys_xiezuo', '960_yys_duihua']
         for name in name_list:
             if name == '960_yys_duihua':
-                time.sleep(random.randint(2, 3))
+                time.sleep(random.randint(1, 2))
             background = self.screen_shot()
             if area:
                 background, start = self.cut(background, area)
@@ -264,5 +264,10 @@ class Player(object):
                     re = name
                     # break
             elif name == '960_yys_duihua':
-                self.moni(twice=True)
+                if n==0:
+                    self.moni(twice=True, n=1)
+                else:
+                    return 'shibai'
+            elif name == '960_yys_moni':
+                return 'shibai'
         return re
