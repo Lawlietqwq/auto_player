@@ -9,8 +9,9 @@ cwd = __file__.replace('auto_player.py', '')  #当前文件目录
 wanted_path = f'{cwd}\\wanted'      #目标图片目录
 #上面都不用改，下面是adb.exe文件所在路径要改，
 #如果你已经加入系统PATH环境，就直接adb = 'adb',我的没加。 只用桌面模式话不用管
-adb = 'd: && cd \\Program Files\\Nox\\bin\\ && nox_adb.exe' #ADB文件路径
-nxfd = 'C:\\Users\\wanquan\\Nox_share\\ImageShare' #模拟器共享文件路径
+# adb = 'd: && cd \\Program Files\\Nox\\bin\\ && nox_adb.exe' #ADB文件路径
+adb = 'cd C:\\Users\\18483\\Nox\\bin\\ && nox_adb.exe' #ADB文件路径
+nxfd = 'C:\\Users\\18483\\Nox_share\\ImageShare' #模拟器共享文件路径
 class Player(object):
     """docstring for Player"""
        # accuracy 匹配精准度 0~1 #adb_mode开启ADB模式  #adb_num连接第几台ADB设备
@@ -195,13 +196,14 @@ class Player(object):
     #寻找name_list中的目标，并点击第一个找到的目标，然后中止
     #注意有优先级顺序，找到了前面的就不会再找后面的
     #只返回第一个找到并点击的name，都没找到返回false
-    def find_touch(self, name_list, area=None):
+    def find_touch(self, name_list, area=None, confirm=False):
         if self.run_times == self.stop_times:
             exit()
         background = self.screen_shot()
         if area:
             background, start = self.cut(background, area)
-        re = False
+        if_jixu = False
+        re = 'yys_jixu'
         name_list = name_list if type(name_list) == list else [name_list,]
         name_list.insert(0, 'yys_xiezuo')
         for name in name_list:
@@ -212,29 +214,38 @@ class Player(object):
                         loc_pos[i][0] += start[0]
                         loc_pos[i][1] += start[1]
                     if_double_click = 'jixu' in name
+                    if_jixu = if_double_click or if_jixu
                     if 'tiaozhan' in name:
                         print(f'还剩{self.stop_times - self.run_times} 次')
                         self.run_times += 1
-
+                        confirm = False
                     if self.drag_flag:
                         if if_double_click:
                             self.drag(loc_pos[i], True)  # 同一目标多个结果时只点第一个
+                            re = name
                         else:
                             self.drag(loc_pos[i], False)  # 同一目标多个结果时只点第一个
                     else:
                         if if_double_click:
                             self.touch(loc_pos[i], True)  # 同一目标多个结果时只点第一个
+                            re = name
                         else:
                             self.touch(loc_pos[i], False)  # 同一目标多个结果时只点第一个
                     r = random.randint(5, 10)/10
                     time.sleep(r)
-                    re = name
                     # break
-        return re
+        if not if_jixu and confirm:
+            self.find_touch([re], confirm=True)
+            return False
+        elif not confirm and if_jixu:
+            return if_jixu
+        elif confirm and if_jixu:
+            return False
+        return confirm
 
     # 打开频道模拟
     def moni(self, twice=False, area=None, n=0):
-        name_list = ['960_yys_moni', '960_yys_duihua']
+        name_list = ['960_yys_moni', '960_yys_fanhui']
         re = False
         name_list = name_list if type(name_list) == list else [name_list,]
         if random.randint(1,2) % 2 == 1:
@@ -242,9 +253,9 @@ class Player(object):
         else:
             name_list.insert(1, '960_yys_yinyangliao')
         if twice:
-            name_list = ['yys_xiezuo', '960_yys_duihua']
+            name_list = ['yys_xiezuo', '960_yys_fanhui']
         for name in name_list:
-            if name == '960_yys_duihua':
+            if name == '960_yys_fanhui':
                 time.sleep(random.randint(1, 2))
             background = self.screen_shot()
             if area:
@@ -263,7 +274,7 @@ class Player(object):
                     time.sleep(r)
                     re = name
                     # break
-            elif name == '960_yys_duihua':
+            elif name == '960_yys_fanhui':
                 if n==0:
                     self.moni(twice=True, n=1)
                 else:

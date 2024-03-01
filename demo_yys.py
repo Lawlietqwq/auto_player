@@ -19,16 +19,16 @@ import random
 
 #ADB模型 CV图像 960*540
 # 960*
-single = True
+single = False
 sum = 0  #多少秒模拟
-stop_times = 298 #次数
+stop_times = 500 #次数
 if single:
 	myplayer = Player(accuracy=0.8, adb_num=0, adb_mode=True, stop_times=stop_times)
 	while True:
-		# myplayer.find_touch(['960_huodong_tiaozhan', '960_yys_jixu']) # 魂土
-		# myplayer.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])
-		myplayer.find_touch(['960_huodong_tiaozhan1.jpg', '960_yys_jixu']) # 活动
-		# if sum > 5:
+		# myplayer.find_touch(['960_huodong_tiaozhan', 'yys_jixu']) # 魂土
+		# myplayer.find_touch(['960_yys_tiaozhan', 'yys_jixu'])
+		myplayer.find_touch(['yys_tiaozhan', 'yys_jixu']) # 活动
+		# if sum > 2:
 		if sum > 60*(10+random.randint(1, 5)):
 			re = myplayer.moni()
 			sum = 0
@@ -38,13 +38,14 @@ if single:
 		sum += r
 		time.sleep(r)
 else:
-	myplayer0 = Player(accuracy=0.8, adb_num=0, adb_mode=True, stop_times=stop_times)  # 大号
-	myplayer1 = Player(accuracy=0.8, adb_num=1, adb_mode=True, stop_times=stop_times)  # 小号
+	myplayer1 = Player(accuracy=0.8, adb_num=1, adb_mode=True, stop_times=stop_times)  # 小号房主在前（魂王）
+	myplayer0 = Player(accuracy=0.8, adb_num=0, adb_mode=True, stop_times=stop_times)  # 大号房主在前（魂土）
+	confirm = False
 	while True:
-		myplayer1.find_touch(['960_hun11_tiaozhan', '960_yys_jixu'])  # 魂土
-		myplayer0.find_touch(['960_hun11_tiaozhan', '960_yys_jixu'])  # 魂土
-		# myplayer1.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])  # 活动
-		# myplayer0.find_touch(['960_yys_tiaozhan', '960_yys_jixu'])  # 活动
+		confirm = myplayer1.find_touch(['duoren_tiaozhan', 'yys_jixu'], confirm=confirm)  # 魂土
+		confirm = myplayer0.find_touch(['duoren_tiaozhan', 'yys_jixu'], confirm=confirm)  # 魂土
+		# myplayer1.find_touch(['960_yys_tiaozhan', 'yys_jixu'])  # 活动
+		# myplayer0.find_touch(['960_yys_tiaozhan', 'yys_jixu'])  # 活动
 		if sum > 60*(10+random.randint(1, 5)):
 		# if sum > 10*(1):
 			re1 = myplayer1.moni()
